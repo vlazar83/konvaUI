@@ -1,0 +1,24 @@
+{
+  "name": "konvaui",
+  "version": "1.0.0",
+  "description": "ui for the graves project",
+  "main": "server.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "start": "http-server"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/vlazar83/konvaUI.git"
+  },
+  "author": "Viktor Lazar",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/vlazar83/konvaUI/issues"
+  },
+  "homepage": "https://github.com/vlazar83/konvaUI#readme",
+  "dependencies": {
+    "express": "^4.18.2",
+    "http-server": "^14.1.1"
+  }
+}
