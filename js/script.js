@@ -25,6 +25,34 @@ var text = new Konva.Text({
 var planetsLayer = new Konva.Layer();
 var circlesLayer = new Konva.Layer();
 var messageLayer = new Konva.Layer();
+var gravesLayer = new Konva.Layer();
+
+var graves = {
+  AA1: {
+    x: 700,
+    y: 126,
+    width: 100,
+    height: 50,
+  },
+  AA2: {
+    x: 900,
+    y: 126,
+    width: 100,
+    height: 50,
+  },
+  AA3: {
+    x: 1100,
+    y: 127,
+    width: 100,
+    height: 50,
+  },
+  AA4: {
+    x: 1300,
+    y: 127,
+    width: 100,
+    height: 50,
+  },
+};
 
 var planets = {
   Mercury: {
@@ -51,6 +79,51 @@ var planets = {
 
 var imageObj = new Image();
 imageObj.onload = function () {
+
+  // draw shape overlays
+  for (var pubKey in graves) {
+    (function () {
+      var key = pubKey;
+      var grave = graves[key];
+
+      var graveOverlay = new Konva.Rect({
+        x: grave.x,
+        y: grave.y,
+        width: grave.width,
+        height: grave.height,
+        fill: 'green'
+      });
+
+      graveOverlay.on("mouseover", function () {
+        graveOverlay.fill("#FFFFFF");
+        writeMessage(key);
+      });
+      graveOverlay.on("click", function () {
+        console.log("clicked: " + key);
+
+        fetch("http://localhost:50001/graves?location=" + key)
+          .then((response) => response.json())
+          .then((data) => {
+            // Do something with the data
+            console.log(data);
+          })
+          .catch((error) => {
+            // Handle any errors
+            console.error(error);
+          });
+
+        // writeMessage("clicked MF");
+      });
+      graveOverlay.on("mouseout", function () {
+        graveOverlay.fill('green');
+        writeMessage("");
+      });
+
+      gravesLayer.add(graveOverlay);
+    })();
+  }
+
+
   // draw shape overlays
   for (var pubKey in planets) {
     (function () {
@@ -112,6 +185,7 @@ imageObj.onload = function () {
   stage.add(planetsLayer);
   stage.add(circlesLayer);
   stage.add(messageLayer);
+  stage.add(gravesLayer);
 
   // draw planets
   var planetsImage = new Konva.Image({
