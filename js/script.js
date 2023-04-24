@@ -79,7 +79,6 @@ var planets = {
 
 var imageObj = new Image();
 imageObj.onload = function () {
-
   // draw shape overlays
   for (var pubKey in graves) {
     (function () {
@@ -91,17 +90,40 @@ imageObj.onload = function () {
         y: grave.y,
         width: grave.width,
         height: grave.height,
-        fill: 'green'
+        fill: "green",
       });
 
       graveOverlay.on("mouseover", function () {
         graveOverlay.fill("#FFFFFF");
         writeMessage(key);
       });
-      graveOverlay.on("click", function () {
+      graveOverlay.on("click", async function () {
         console.log("clicked: " + key);
 
-        fetch("http://localhost:50001/graves?location=" + key)
+        var jwt = "";
+
+        await fetch("https://dev-sm4ylq004f4gs18a.eu.auth0.com/oauth/token", {
+          method: "POST",
+          body: JSON.stringify({
+            audience: "https://gravesAPI",
+            grant_type: "client_credentials",
+          }),
+          headers: {
+            "Content-type": "application/json; charset=UTF-8",
+            Authorization:
+              "Basic RFc4T0JBbXdZc244VWlsaEpXMzk2WFh6aUdIWU5lTHA6bmo4VUJPU1RqbXZqN0pLTndIODZqT294UHJxTXl3UkNDZE43R0NhTGhOcDI4UHZzcjh0Y1hOWmFpOFl2Q1hmeQ==",
+          },
+        })
+          .then((response) => response.json())
+          .then((json) => (jwt = json.access_token));
+
+        fetch("http://localhost:50001/graves?location=" + key, {
+          method: "GET",
+          headers: {
+            "Content-type": "application/json; charset=UTF-8",
+            Authorization: "Bearer " + jwt,
+          },
+        })
           .then((response) => response.json())
           .then((data) => {
             // Do something with the data
@@ -115,14 +137,13 @@ imageObj.onload = function () {
         // writeMessage("clicked MF");
       });
       graveOverlay.on("mouseout", function () {
-        graveOverlay.fill('green');
+        graveOverlay.fill("green");
         writeMessage("");
       });
 
       gravesLayer.add(graveOverlay);
     })();
   }
-
 
   // draw shape overlays
   for (var pubKey in planets) {
