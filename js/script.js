@@ -9,15 +9,17 @@ function writeMessage(message) {
 
 function prepareMessage(graveData){
   var message = "";
-  graveData[0].persons.forEach(getPersons);
-  message = "location: " + graveData[0].location + "\n";
-  message = message + personDetails;
-  message = message + "note: " + graveData[0].note;
-  return message;
+  if(graveData[0] != undefined ){
+    graveData[0].persons.forEach(getPersons);
+    message = "location: " + graveData[0].location + "\n";
+    message = message + personDetails;
+    message = message + "note: " + graveData[0].note;
+    return message;
+  }
 }
 
 function getPersons(person) {
-  personDetails = person.name + ": " + person.bornDate + " - " + person.deathDate +  ";\n"
+  personDetails = personDetails + person.name + ": " + person.bornDate + " - " + person.deathDate +  ";\n"
 }
 
 async function getJwtToken() {
@@ -141,13 +143,9 @@ imageObj.onload = function () {
         fill: "green",
       });
 
-      graveOverlay.on("mouseover", function () {
+      graveOverlay.on("mouseover", async function () {
         graveOverlay.fill("#FFFFFF");
         writeMessage(key);
-      });
-      graveOverlay.on("click", async function () {
-        console.log("clicked: " + key);
-
         await getJwtTokenFromStorage();
 
         fetch("http://localhost:50001/graves?location=" + key, {
@@ -169,12 +167,37 @@ imageObj.onload = function () {
             // Handle any errors
             console.error(error);
           });
-
-        // writeMessage("clicked MF");
       });
+      graveOverlay.on("click", async function () {
+        console.log("clicked: " + key);
+
+        // await getJwtTokenFromStorage();
+
+        // fetch("http://localhost:50001/graves?location=" + key, {
+        //   method: "GET",
+        //   headers: {
+        //     "Content-type": "application/json; charset=UTF-8",
+        //     Authorization: "Bearer " + localStorage.getItem("gravesAPI_JWT"),
+        //   },
+        // })
+        //   .then((response) => response.json())
+        //   .then((data) => {
+        //     // Do something with the data
+        //     console.log(data);
+        //     var message = prepareMessage(data);
+        //     console.log(message);
+        //     writeMessage(message);
+        //   })
+        //   .catch((error) => {
+        //     // Handle any errors
+        //     console.error(error);
+        //   });
+      });
+
       graveOverlay.on("mouseout", function () {
         graveOverlay.fill("green");
         writeMessage("");
+        personDetails = "";
       });
 
       gravesLayer.add(graveOverlay);
