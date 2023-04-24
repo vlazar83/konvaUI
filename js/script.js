@@ -1,8 +1,42 @@
 var width = window.innerWidth;
 var height = window.innerHeight;
+var jwt = "";
 
 function writeMessage(message) {
   text.text(message);
+}
+
+async function getJwtToken() {
+  await fetch("https://dev-sm4ylq004f4gs18a.eu.auth0.com/oauth/token", {
+    method: "POST",
+    body: JSON.stringify({
+      audience: "https://gravesAPI",
+      grant_type: "client_credentials",
+    }),
+    headers: {
+      "Content-type": "application/json; charset=UTF-8",
+      Authorization:
+        "Basic RFc4T0JBbXdZc244VWlsaEpXMzk2WFh6aUdIWU5lTHA6bmo4VUJPU1RqbXZqN0pLTndIODZqT294UHJxTXl3UkNDZE43R0NhTGhOcDI4UHZzcjh0Y1hOWmFpOFl2Q1hmeQ==",
+    },
+  })
+    .then((response) => response.json())
+    .then((json) => {
+      jwt = json.access_token;
+      localStorage.setItem("gravesAPI_JWT", jwt);
+      localStorage.setItem("gravesAPI_JWT_TIMESTAMP", Date.now());
+    });
+}
+
+async function getJwtTokenFromStorage() {
+  if (localStorage.getItem("gravesAPI_JWT") == undefined || localStorage.getItem("gravesAPI_JWT") == null) {
+    await getJwtToken();
+  } else {
+    // check if expired
+    var oldTimestamp = localStorage.getItem("gravesAPI_JWT_TIMESTAMP");
+    if (Number(oldTimestamp) + 86400000 <= Date.now()) {
+      await getJwtToken();
+    }
+  }
 }
 
 var stage = new Konva.Stage({
@@ -100,28 +134,13 @@ imageObj.onload = function () {
       graveOverlay.on("click", async function () {
         console.log("clicked: " + key);
 
-        var jwt = "";
-
-        await fetch("https://dev-sm4ylq004f4gs18a.eu.auth0.com/oauth/token", {
-          method: "POST",
-          body: JSON.stringify({
-            audience: "https://gravesAPI",
-            grant_type: "client_credentials",
-          }),
-          headers: {
-            "Content-type": "application/json; charset=UTF-8",
-            Authorization:
-              "Basic RFc4T0JBbXdZc244VWlsaEpXMzk2WFh6aUdIWU5lTHA6bmo4VUJPU1RqbXZqN0pLTndIODZqT294UHJxTXl3UkNDZE43R0NhTGhOcDI4UHZzcjh0Y1hOWmFpOFl2Q1hmeQ==",
-          },
-        })
-          .then((response) => response.json())
-          .then((json) => (jwt = json.access_token));
+        await getJwtTokenFromStorage();
 
         fetch("http://localhost:50001/graves?location=" + key, {
           method: "GET",
           headers: {
             "Content-type": "application/json; charset=UTF-8",
-            Authorization: "Bearer " + jwt,
+            Authorization: "Bearer " + localStorage.getItem("gravesAPI_JWT"),
           },
         })
           .then((response) => response.json())
