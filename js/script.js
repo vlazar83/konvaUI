@@ -1,59 +1,8 @@
+import { writeMessage, prepareMessage, resetPersonDetails, getJwtTokenFromStorage } from "./utils.js";
+import { graves, planets } from "./data.js";
+
 var width = window.innerWidth;
 var height = window.innerHeight;
-var jwt = "";
-var personDetails = "";
-
-function writeMessage(message) {
-  text.text(message);
-}
-
-function prepareMessage(graveData){
-  var message = "";
-  if(graveData[0] != undefined ){
-    graveData[0].persons.forEach(getPersons);
-    message = "location: " + graveData[0].location + "\n";
-    message = message + personDetails;
-    message = message + "note: " + graveData[0].note;
-    return message;
-  }
-}
-
-function getPersons(person) {
-  personDetails = personDetails + person.name + ": " + person.bornDate + " - " + person.deathDate +  ";\n"
-}
-
-async function getJwtToken() {
-  await fetch("https://dev-sm4ylq004f4gs18a.eu.auth0.com/oauth/token", {
-    method: "POST",
-    body: JSON.stringify({
-      audience: "https://gravesAPI",
-      grant_type: "client_credentials",
-    }),
-    headers: {
-      "Content-type": "application/json; charset=UTF-8",
-      Authorization:
-        "Basic RFc4T0JBbXdZc244VWlsaEpXMzk2WFh6aUdIWU5lTHA6bmo4VUJPU1RqbXZqN0pLTndIODZqT294UHJxTXl3UkNDZE43R0NhTGhOcDI4UHZzcjh0Y1hOWmFpOFl2Q1hmeQ==",
-    },
-  })
-    .then((response) => response.json())
-    .then((json) => {
-      jwt = json.access_token;
-      localStorage.setItem("gravesAPI_JWT", jwt);
-      localStorage.setItem("gravesAPI_JWT_TIMESTAMP", Date.now());
-    });
-}
-
-async function getJwtTokenFromStorage() {
-  if (localStorage.getItem("gravesAPI_JWT") == undefined || localStorage.getItem("gravesAPI_JWT") == null) {
-    await getJwtToken();
-  } else {
-    // check if expired
-    var oldTimestamp = localStorage.getItem("gravesAPI_JWT_TIMESTAMP");
-    if (Number(oldTimestamp) + 86400000 <= Date.now()) {
-      await getJwtToken();
-    }
-  }
-}
 
 var stage = new Konva.Stage({
   container: "container",
@@ -63,7 +12,7 @@ var stage = new Konva.Stage({
 
 var layer = new Konva.Layer();
 
-var text = new Konva.Text({
+export var konvaText = new Konva.Text({
   x: 100,
   y: 400,
   fontFamily: "Calibri",
@@ -76,56 +25,6 @@ var planetsLayer = new Konva.Layer();
 var circlesLayer = new Konva.Layer();
 var messageLayer = new Konva.Layer();
 var gravesLayer = new Konva.Layer();
-
-var graves = {
-  AA1: {
-    x: 700,
-    y: 126,
-    width: 100,
-    height: 50,
-  },
-  AA2: {
-    x: 900,
-    y: 126,
-    width: 100,
-    height: 50,
-  },
-  AA3: {
-    x: 1100,
-    y: 127,
-    width: 100,
-    height: 50,
-  },
-  AA4: {
-    x: 1300,
-    y: 127,
-    width: 100,
-    height: 50,
-  },
-};
-
-var planets = {
-  Mercury: {
-    x: 46,
-    y: 126,
-    radius: 32,
-  },
-  Venus: {
-    x: 179,
-    y: 126,
-    radius: 79,
-  },
-  Earth: {
-    x: 366,
-    y: 127,
-    radius: 85,
-  },
-  Mars: {
-    x: 515,
-    y: 127,
-    radius: 45,
-  },
-};
 
 var imageObj = new Image();
 imageObj.onload = function () {
@@ -170,34 +69,12 @@ imageObj.onload = function () {
       });
       graveOverlay.on("click", async function () {
         console.log("clicked: " + key);
-
-        // await getJwtTokenFromStorage();
-
-        // fetch("http://localhost:50001/graves?location=" + key, {
-        //   method: "GET",
-        //   headers: {
-        //     "Content-type": "application/json; charset=UTF-8",
-        //     Authorization: "Bearer " + localStorage.getItem("gravesAPI_JWT"),
-        //   },
-        // })
-        //   .then((response) => response.json())
-        //   .then((data) => {
-        //     // Do something with the data
-        //     console.log(data);
-        //     var message = prepareMessage(data);
-        //     console.log(message);
-        //     writeMessage(message);
-        //   })
-        //   .catch((error) => {
-        //     // Handle any errors
-        //     console.error(error);
-        //   });
       });
 
       graveOverlay.on("mouseout", function () {
         graveOverlay.fill("green");
         writeMessage("");
-        personDetails = "";
+        resetPersonDetails();
       });
 
       gravesLayer.add(graveOverlay);
@@ -233,8 +110,6 @@ imageObj.onload = function () {
             // Handle any errors
             console.error(error);
           });
-
-        // writeMessage("clicked MF");
       });
       planetOverlay.on("mouseout", function () {
         planetOverlay.fill("#FFFFFF00");
@@ -261,7 +136,7 @@ imageObj.onload = function () {
     false
   );
 
-  messageLayer.add(text);
+  messageLayer.add(konvaText);
   stage.add(planetsLayer);
   stage.add(circlesLayer);
   stage.add(messageLayer);
