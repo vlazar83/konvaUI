@@ -25,6 +25,7 @@ async function getJwtToken() {
 }
 
 export async function getJwtTokenFromStorage() {
+    await delay(1000);
   if (localStorage.getItem("gravesAPI_JWT") == undefined || localStorage.getItem("gravesAPI_JWT") == null) {
     await getJwtToken();
   } else {
@@ -57,3 +58,9 @@ function getPersons(person) {
 export function resetPersonDetails() {
     personDetails = "";
 }
+
+function delay(milliseconds){
+    return new Promise(resolve => {
+        setTimeout(resolve, milliseconds);
+    });
+  }
