@@ -1,9 +1,23 @@
 var width = window.innerWidth;
 var height = window.innerHeight;
 var jwt = "";
+var personDetails = "";
 
 function writeMessage(message) {
   text.text(message);
+}
+
+function prepareMessage(graveData){
+  var message = "";
+  graveData[0].persons.forEach(getPersons);
+  message = "location: " + graveData[0].location + "\n";
+  message = message + personDetails;
+  message = message + "note: " + graveData[0].note;
+  return message;
+}
+
+function getPersons(person) {
+  personDetails = person.name + ": " + person.bornDate + " - " + person.deathDate +  ";\n"
 }
 
 async function getJwtToken() {
@@ -48,12 +62,12 @@ var stage = new Konva.Stage({
 var layer = new Konva.Layer();
 
 var text = new Konva.Text({
-  x: 10,
-  y: 10,
+  x: 100,
+  y: 400,
   fontFamily: "Calibri",
   fontSize: 24,
   text: "",
-  fill: "white",
+  fill: "green",
 });
 
 var planetsLayer = new Konva.Layer();
@@ -147,6 +161,9 @@ imageObj.onload = function () {
           .then((data) => {
             // Do something with the data
             console.log(data);
+            var message = prepareMessage(data);
+            console.log(message);
+            writeMessage(message);
           })
           .catch((error) => {
             // Handle any errors
