@@ -45,6 +45,9 @@ imageObj.onload = function () {
       graveOverlay.on("mouseover", async function () {
         graveOverlay.fill("#FFFFFF");
         writeMessage(key);
+      });
+      graveOverlay.on("click", async function () {
+        console.log("clicked: " + key);
         JsLoadingOverlay.show();
         await getJwtTokenFromStorage();
 
@@ -69,9 +72,6 @@ imageObj.onload = function () {
             console.error(error);
           });
           JsLoadingOverlay.hide();
-      });
-      graveOverlay.on("click", async function () {
-        console.log("clicked: " + key);
       });
 
       graveOverlay.on("mouseout", function () {
